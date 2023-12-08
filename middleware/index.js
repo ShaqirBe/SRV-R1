@@ -1,6 +1,8 @@
+const db = require('../database/database')
+
 function validateBodyFields(req, res, next) {
 
-    const expectedFields = ['email', 'firstname', 'lastname'];
+    const expectedFields = ['email', 'firstName', 'lastName'];
     const missingFields = expectedFields.filter(field => !req.body[field]);
 
     if (missingFields.length > 0) {
@@ -9,16 +11,33 @@ function validateBodyFields(req, res, next) {
 
     next();
 }
-async function emailAlreadyRegistered(req, res, next) {
+// async function emailAlreadyRegistered(req, res, next) {
     
-    const user = await db.collection('users').findOne({ email: req.body.email });
+//     const user = await db.collection('users').findOne({ email: req.body.email });
 
-    if (user) {
-        return res.status(400).json({ error: 'Email already registered' });
+//     if (user) {
+//         return res.status(400).json({ error: 'Email already registered' });
+//     }
+
+//     next();
+// }
+async function emailAlreadyRegistered(req, res, next) {
+    try {
+        // Assuming 'email' is the key for the 'users' table in DynamoDB
+        const user = await db.get({ email: req.body.email });
+
+        if (user) {
+            return res.status(400).json({ error: 'Email already registered' });
+        }
+
+        next();
+    } catch (error) {
+        console.error(error);  // Log the error to the console
+        res.status(500).json({ error: 'Error checking email registration' });
     }
-
-    next();
 }
+
+
 async function validUserEmail(req, res, next) {
     const user = await db.collection('users').findOne({ email: req.params.email, active: true });
 
