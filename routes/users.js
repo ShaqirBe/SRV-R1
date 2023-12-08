@@ -18,6 +18,7 @@ router.post('/register', validateBodyFields, validEmailFormat,  async function(r
     });
     res.json(JSend.success(null));
   } catch (error) {
+    console.error(error);
     res.json(JSend.error("Error registering user"));
   }
 });
